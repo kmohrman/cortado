@@ -111,10 +111,8 @@ if __name__ == '__main__':
         print(type(dask_write_out))
         dask.compute(
             dask_write_out,
-            #scheduler=m.get,
-            #resources={"cores": 1},
-            #resources_mode=None,
-            #lazy_transfers=True,
+            scheduler=m.get,
+            lazy_transfers=True,
         )
 
     print("Done!")
