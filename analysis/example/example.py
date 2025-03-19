@@ -41,14 +41,16 @@ dataset_runnable, _ = preprocess(
     {
         "dataset1": {
             "files": {
-                f"10495AF7-2F9C-6440-BC72-4A29B6FEAEC7.root": "Events" for i in range(0, 100) # How ever many 
+                #f"10495AF7-2F9C-6440-BC72-4A29B6FEAEC7.root": "Events" for i in range(0, 100), # How ever many 
+                "10495AF7-2F9C-6440-BC72-4A29B6FEAEC7.root": "Events",
+                "A6787F82-D6B8-424D-B35A-2A32FDB2837D.root": "Events",
             }
         },
-        "dataset2": {
-            "files": {
-                f"A6787F82-D6B8-424D-B35A-2A32FDB2837D.root": "Events" for i in range(0, 200) # Another data set
-            }
-        }
+        #"dataset2": {
+        #    "files": {
+        #        f"A6787F82-D6B8-424D-B35A-2A32FDB2837D.root": "Events" for i in range(0, 200) # Another data set
+        #    }
+        #}
     },
     align_clusters=False,
     step_size=100_000,  # You may want to set this to something slightly smaller to avoid loading too much in memory
