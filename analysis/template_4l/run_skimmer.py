@@ -80,6 +80,7 @@ if __name__ == '__main__':
         name=f"coffea-vine-{os.environ['USER']}",
         run_info_path="/blue/p.chang/k.mohrman/vine-run-info",
     )
+    proxy = m.declare_file(f"/tmp/x509up_u{os.getuid()}", cache=True)
     #############################
 
 
@@ -113,6 +114,8 @@ if __name__ == '__main__':
             dask_write_out,
             scheduler=m.get,
             lazy_transfers=True,
+            extra_files={proxy: "proxy.pem"},
+            env_vars={"X509_USER_PROXY": "proxy.pem"},
         )
 
     print("Done!")
