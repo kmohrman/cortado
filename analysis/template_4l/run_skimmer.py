@@ -1,3 +1,4 @@
+import argparse
 import time
 import yaml
 import json
@@ -29,12 +30,20 @@ def pretty_print_time(t0,t1,tag,indent=" "*4):
 
 if __name__ == '__main__':
 
-    ###### Get info from the input jsons ######
+
+    ############ Parse input args ############
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("sample_cfg_name", help = "The name of the cfg file")
+    args = parser.parse_args()
+
+
+    ############ Get list of files from the input jsons ############
 
     # Get the prefix and json names from the cfg file
     prefix = ""
     json_lst = []
-    lines = read_file("samples.cfg")
+    lines = read_file(args.sample_cfg_name)
     for line in lines:
         if line.startswith("#"): continue
         if line == "": continue
@@ -61,7 +70,9 @@ if __name__ == '__main__':
             dataset_dict[tag]["files"][fullpath] = "Events"
     print(f"\nDataset dict:\n{dataset_dict}\n")
 
-    ### Set up DaskVine stuff ###
+
+    ############ Set up DaskVine stuff ############
+
     m = DaskVine(
         [9123,9128],
         name=f"coffea-vine-{os.environ['USER']}",
@@ -71,7 +82,11 @@ if __name__ == '__main__':
 
     t_after_setup = time.time()
 
-    ###### Run ######
+
+
+    ############ Run ############
+
+    # This section is mainly copied from: https://github.com/scikit-hep/coffea/discussions/1100
 
     # Run preprocess
     print("\nRunning preprocessing..")  # To obtain file splitting
@@ -95,7 +110,7 @@ if __name__ == '__main__':
     print(f"\nSkimmed dict:\n{skimmed_dict}\n")
 
 
-    # Executing task graph and saving
+    # Loop over datasets and execute task graph and save
     print("Executing task graph and saving")
     dataset_counter = 0
     t_dict = {"loop_start":[], "uproot_writeable":[], "repartition":[], "dask_write":[], "dask.compute":[]}
@@ -111,9 +126,7 @@ if __name__ == '__main__':
         t_dict["uproot_writeable"].append(time.time())
 
         # Reparititioning so that output has this many input partitions to on output
-        skimmed = skimmed.repartition(
-            n_to_one=1_000
-        )
+        skimmed = skimmed.repartition(n_to_one=1_000)
         t_dict["repartition"].append(time.time())
 
         # What does this do
@@ -138,7 +151,9 @@ if __name__ == '__main__':
     t_end = time.time()
 
 
-    # Print timing info
+
+    ############ Print timing info ############
+
     print("\nTiming info:")
     pretty_print_time(t_start,                t_after_setup,          "Time to setup")
     pretty_print_time(t_after_setup,          t_after_preprocess,     "Time for preprocess")
@@ -150,4 +165,5 @@ if __name__ == '__main__':
         pretty_print_time(t_dict["dask_write"][i],       t_dict["dask.compute"][i],     f"Dataset {i}: time for dask.compute", "\t")
     pretty_print_time(t_after_applytofileset, t_end, "Time for the full run loop")
     print("\nDone!\n")
+
 
