@@ -11,7 +11,7 @@ cd cortado
 Next, create a `conda` environment and activate it. 
 ```
 conda env create -f environment.yml
-conda activate coffea-env
+conda activate cortado_env
 ```
 Now we can install the `cortado` package into our new conda environment. This command should be run from the toplevel `cortado` directory, i.e. the directory which contains the `setup.py` script. 
 ```
@@ -23,9 +23,9 @@ Now all of the dependencies have been installed and the `cortado` repository is 
 To run an example skimming workflow, navigate to the `template_4l` and run the example run script. 
 ```
 cd analysis/template_4l
-run_skimmer.py
+python run_skimmer.py exampl_samples.cfg
 ```
-If running with the `DaskVine` scheduler, an example command to submit a worker is below (example is relevant to running on `hipergator` at UF). It can be run in a separate terminal (but if running in a different terminal, remember to activate the conda environment there as well).
+Remember to acitivate the `voms-proxy` if using `xrd` to access the files. If running with the `DaskVine` scheduler, an example command to submit a worker is below (example is relevant to running on `hipergator` at UF). It can be run in a separate terminal (but if running in a different terminal, remember to activate the conda environment there as well).
 ```
 vine_submit_workers -T slurm --cores 2 --memory 4G -M coffea-vine-${USER} -p  "--account avery --qos avery --time 0:30:00" 1
 ```
