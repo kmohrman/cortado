@@ -41,6 +41,7 @@ if __name__ == '__main__':
     ############ Get list of files from the input jsons ############
 
     # Get the prefix and json names from the cfg file
+    # This is quite brittle
     prefix = ""
     json_lst = []
     lines = read_file(args.sample_cfg_name)
@@ -58,17 +59,39 @@ if __name__ == '__main__':
         with open(json_name) as jf:
             samples_dict[json_name] = json.load(jf)
 
+    # Print some summary info about the files to be processed
+    print("\nInformation about samples to be processed:")
+    total_events = 0
+    total_size = 0
+    have_events_and_sizes = True
+    for ds_name in samples_dict:
+        if "nevents" in samples_dict[ds_name] and "size" in samples_dict[ds_name]:
+            nevents = samples_dict[ds_name]["nevents"]
+            size    = samples_dict[ds_name]["size"]
+            total_events += nevents
+            total_size   += size
+            print(f"    Name: {ds_name} ({nevents} events)")
+        else:
+            print(f"    Name: {ds_name}")
+            have_events_and_sizes = False
+    if have_events_and_sizes:
+        print(f"    Total events: {total_events}")
+        print(f"    Total size: {total_size}\n")
+
     # Make the dataset object the processor wants
-    #print(samples_dict)
     dataset_dict = {}
     for json_path in samples_dict.keys():
+        # Drop the .json from the end to get a name
         tag = json_path.split("/")[-1][:-5]
+        # Prepend the prefix to the filenames and fill into the dataset dict
         dataset_dict[tag] = {}
         dataset_dict[tag]["files"] = {}
         for filename in samples_dict[json_path]["files"]:
             fullpath = prefix+filename
             dataset_dict[tag]["files"][fullpath] = "Events"
-    print(f"\nDataset dict:\n{dataset_dict}\n")
+
+    #print(f"\nDataset dict:\n{dataset_dict}\n")
+
 
 
     ############ Set up DaskVine stuff ############
@@ -104,7 +127,10 @@ if __name__ == '__main__':
     # Run apply_to_fileset
     print("\nComputing dask task graph..")
     skimmed_dict = apply_to_fileset(
-        skim_tools.make_skimmed_events, dataset_runnable, schemaclass=NanoAODSchema
+        skim_tools.make_skimmed_events,
+        dataset_runnable,
+        schemaclass=NanoAODSchema,
+        uproot_options={"timeout": 180},
     )
     t_after_applytofileset = time.time()
     print(f"\nSkimmed dict:\n{skimmed_dict}\n")
@@ -120,25 +146,30 @@ if __name__ == '__main__':
         print(f"Name of dataset {dataset_counter}: {dataset}")
 
         # What does this do
+        print("\tRunning uproot_writeable")
         skimmed = skim_tools.uproot_writeable(
             skimmed,
         )
         t_dict["uproot_writeable"].append(time.time())
 
         # Reparititioning so that output has this many input partitions to on output
+        print("\tRunning repartition")
         skimmed = skimmed.repartition(n_to_one=1_000)
         t_dict["repartition"].append(time.time())
 
         # What does this do
+        print("\tRunning dask_write")
         dask_write_out = uproot.dask_write(
             skimmed,
             destination="skimtest/",
+            #destination="/blue/p.chang/k.mohrman/misc/skimout/",
             prefix=f"{dataset}/skimmed",
             compute=False,
         )
         t_dict["dask_write"].append(time.time())
 
         # Call compute on the skimmed output
+        print("\tRunning dask.compute")
         dask.compute(
             dask_write_out,
             scheduler=m.get,
