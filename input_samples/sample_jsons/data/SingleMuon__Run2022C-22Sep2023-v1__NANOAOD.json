@@ -35,5 +35,7 @@
         "/store/data/Run2022C/SingleMuon/NANOAOD/22Sep2023-v1/50000/d4c115f6-7678-4b6d-8aea-2a4f69f8afc1.root",
         "/store/data/Run2022C/SingleMuon/NANOAOD/22Sep2023-v1/50000/d7a2f297-2c9a-4b98-bba7-e96c7a292bc8.root",
         "/store/data/Run2022C/SingleMuon/NANOAOD/22Sep2023-v1/50000/f67e049d-53bb-48da-b00e-e040ff52aa33.root"
-    ]
+    ],
+    "size": 16854653265,
+    "nevents": 20162441
 }

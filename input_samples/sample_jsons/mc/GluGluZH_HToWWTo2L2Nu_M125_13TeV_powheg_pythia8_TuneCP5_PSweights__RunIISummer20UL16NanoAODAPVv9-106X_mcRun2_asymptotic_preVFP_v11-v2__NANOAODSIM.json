@@ -2,5 +2,7 @@
     "files": [
         "/store/mc/RunIISummer20UL16NanoAODAPVv9/GluGluZH_HToWWTo2L2Nu_M125_13TeV_powheg_pythia8_TuneCP5_PSweights/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v2/2500000/90E87003-DD93-EF4C-B589-10C2EAA808D3.root",
         "/store/mc/RunIISummer20UL16NanoAODAPVv9/GluGluZH_HToWWTo2L2Nu_M125_13TeV_powheg_pythia8_TuneCP5_PSweights/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v2/40000/DF726796-638C-3E4C-9A88-1D1563468CD4.root"
-    ]
+    ],
+    "size": 999363709,
+    "nevents": 499998
 }

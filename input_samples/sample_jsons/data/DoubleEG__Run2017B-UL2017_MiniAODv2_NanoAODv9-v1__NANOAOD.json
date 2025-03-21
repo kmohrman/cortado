@@ -29,5 +29,7 @@
         "/store/data/Run2017B/DoubleEG/NANOAOD/UL2017_MiniAODv2_NanoAODv9-v1/70000/CB6E503B-873E-5F4D-85A1-BCA368E0395F.root",
         "/store/data/Run2017B/DoubleEG/NANOAOD/UL2017_MiniAODv2_NanoAODv9-v1/70000/CFCA7A3D-1FCD-1644-97A4-27F303DDA461.root",
         "/store/data/Run2017B/DoubleEG/NANOAOD/UL2017_MiniAODv2_NanoAODv9-v1/70000/D3707E68-5015-C240-B8A6-4134B9387B09.root"
-    ]
+    ],
+    "size": 54427673783,
+    "nevents": 58088760
 }

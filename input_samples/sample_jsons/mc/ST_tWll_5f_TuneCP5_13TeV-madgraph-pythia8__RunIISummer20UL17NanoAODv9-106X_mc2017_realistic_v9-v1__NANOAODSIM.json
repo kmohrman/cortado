@@ -21,5 +21,7 @@
         "/store/mc/RunIISummer20UL17NanoAODv9/ST_tWll_5f_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/40000/F7558A89-68C3-4542-A50E-79DF45C1E5B1.root",
         "/store/mc/RunIISummer20UL17NanoAODv9/ST_tWll_5f_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/40000/FB07F1A1-F609-CB48-965E-1DAE7F314E8A.root",
         "/store/mc/RunIISummer20UL17NanoAODv9/ST_tWll_5f_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/50000/5C8AEF87-FFD1-3B4A-8F8E-BBB4E123A791.root"
-    ]
+    ],
+    "size": 2021619931,
+    "nevents": 710000
 }

@@ -5,5 +5,7 @@
         "/store/mc/Run3Summer23BPixNanoAODv12/GluGlutoContinto2Zto2E2Tau_TuneCP5_13p6TeV_mcfm701-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/40000/41055b5a-f53b-4431-a109-7ef2210e0479.root",
         "/store/mc/Run3Summer23BPixNanoAODv12/GluGlutoContinto2Zto2E2Tau_TuneCP5_13p6TeV_mcfm701-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/40000/7f61f343-db0b-41fc-ad9d-1a78e0044d1d.root",
         "/store/mc/Run3Summer23BPixNanoAODv12/GluGlutoContinto2Zto2E2Tau_TuneCP5_13p6TeV_mcfm701-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/40000/e4068944-87fa-4036-91d3-e0e846875572.root"
-    ]
+    ],
+    "size": 343597019,
+    "nevents": 183500
 }

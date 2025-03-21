@@ -92,5 +92,7 @@
         "/store/mc/Run3Summer23NanoAODv12/TBbarQ_t-channel_4FS_TuneCP5_13p6TeV_powheg-madspin-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15-v2/2830000/f10add18-8b3b-4c83-bc62-7ccd14b19490.root",
         "/store/mc/Run3Summer23NanoAODv12/TBbarQ_t-channel_4FS_TuneCP5_13p6TeV_powheg-madspin-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15-v2/2830000/f74e2bac-bc8d-4e5a-86bd-2a0a271ea2ba.root",
         "/store/mc/Run3Summer23NanoAODv12/TBbarQ_t-channel_4FS_TuneCP5_13p6TeV_powheg-madspin-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15-v2/2830000/fa920885-1ed3-41ae-902e-efd9f6b6f064.root"
-    ]
+    ],
+    "size": 10318317651,
+    "nevents": 5786000
 }

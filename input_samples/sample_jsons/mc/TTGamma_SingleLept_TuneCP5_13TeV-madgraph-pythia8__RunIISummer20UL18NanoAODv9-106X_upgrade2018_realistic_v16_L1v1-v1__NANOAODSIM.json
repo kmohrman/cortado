@@ -31,5 +31,7 @@
         "/store/mc/RunIISummer20UL18NanoAODv9/TTGamma_SingleLept_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/70000/181F4653-9415-CE43-AEB0-E8A16A4A43AA.root",
         "/store/mc/RunIISummer20UL18NanoAODv9/TTGamma_SingleLept_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/70000/592E01B7-90D4-5546-A58A-05040542FAEE.root",
         "/store/mc/RunIISummer20UL18NanoAODv9/TTGamma_SingleLept_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/70000/885A88B0-5964-0E41-BB39-28245B1C8C9F.root"
-    ]
+    ],
+    "size": 61474505643,
+    "nevents": 27731999
 }

@@ -25,5 +25,7 @@
         "/store/data/Run2023C/MuonEG/NANOAOD/22Sep2023_v1-v1/50000/b560a3c9-3477-44cb-a1ae-30a528e80ca7.root",
         "/store/data/Run2023C/MuonEG/NANOAOD/22Sep2023_v1-v1/50000/c3a4a991-d437-4a0f-a8a7-a26cb138fa65.root",
         "/store/data/Run2023C/MuonEG/NANOAOD/22Sep2023_v1-v1/50000/e1b5f78a-db38-458c-b16d-261eb55404ab.root"
-    ]
+    ],
+    "size": 11321043709,
+    "nevents": 9772655
 }

@@ -109,5 +109,7 @@
         "/store/data/Run2022D/EGamma/NANOAOD/22Sep2023-v1/30000/df29deb4-e128-4807-8d2f-06ee07fd7f19.root",
         "/store/data/Run2022D/EGamma/NANOAOD/22Sep2023-v1/30000/eea71cb8-190c-4ad6-9bf0-3d7ae512a764.root",
         "/store/data/Run2022D/EGamma/NANOAOD/22Sep2023-v1/410000/8374e6b0-c97e-4bc8-b095-9eaee52632e6.root"
-    ]
+    ],
+    "size": 87706234303,
+    "nevents": 89134996
 }

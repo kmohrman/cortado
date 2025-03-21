@@ -15,5 +15,7 @@
         "/store/mc/Run3Summer23NanoAODv12/VBS-SSWW_PolarizationTT_TuneCP5_13p6TeV_madgraph-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15-v3/50000/ab64ce21-0994-41f9-8993-24212b7acd3c.root",
         "/store/mc/Run3Summer23NanoAODv12/VBS-SSWW_PolarizationTT_TuneCP5_13p6TeV_madgraph-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15-v3/50000/dc5e435d-f6a9-4353-bf1c-d8be963d9bf6.root",
         "/store/mc/Run3Summer23NanoAODv12/VBS-SSWW_PolarizationTT_TuneCP5_13p6TeV_madgraph-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15-v3/50000/ee86c2fd-1ba9-4a13-b325-943670e397d2.root"
-    ]
+    ],
+    "size": 2234514304,
+    "nevents": 1000000
 }

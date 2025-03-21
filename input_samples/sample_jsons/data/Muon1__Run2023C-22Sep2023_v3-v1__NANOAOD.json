@@ -30,5 +30,7 @@
         "/store/data/Run2023C/Muon1/NANOAOD/22Sep2023_v3-v1/40000/c989d95b-1ca2-41e9-a308-246dab6b03a1.root",
         "/store/data/Run2023C/Muon1/NANOAOD/22Sep2023_v3-v1/40000/e3b342ba-059f-4d93-b2ae-893f72816661.root",
         "/store/data/Run2023C/Muon1/NANOAOD/22Sep2023_v3-v1/40000/e9ecbf46-d991-4372-a59a-1b8b962e0fa4.root"
-    ]
+    ],
+    "size": 16380526417,
+    "nevents": 20010429
 }

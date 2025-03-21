@@ -16,5 +16,7 @@
         "/store/data/Run2017D/DoubleMuon/NANOAOD/UL2017_MiniAODv2_NanoAODv9-v1/70000/9767B243-B417-3F4B-8B54-7E47A5E6BF6A.root",
         "/store/data/Run2017D/DoubleMuon/NANOAOD/UL2017_MiniAODv2_NanoAODv9-v1/70000/ACFA3E14-3146-9847-8912-C0C0A2B36619.root",
         "/store/data/Run2017D/DoubleMuon/NANOAOD/UL2017_MiniAODv2_NanoAODv9-v1/70000/E96239F5-3E74-2544-B0CF-804D466641AE.root"
-    ]
+    ],
+    "size": 22212218349,
+    "nevents": 23075733
 }

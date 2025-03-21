@@ -28,5 +28,7 @@
         "/store/mc/RunIISummer20UL18NanoAODv9/WWTo2L2Nu_TuneCP5_DoubleScattering_13TeV-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/50000/F7A32369-CB7D-1D48-851A-924F2C59EC4D.root",
         "/store/mc/RunIISummer20UL18NanoAODv9/WWTo2L2Nu_TuneCP5_DoubleScattering_13TeV-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/50000/FD697C77-1E22-B14C-A4D6-7E37E0E09CCB.root",
         "/store/mc/RunIISummer20UL18NanoAODv9/WWTo2L2Nu_TuneCP5_DoubleScattering_13TeV-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/50000/FE5EFD03-6368-F844-9D94-CB68086B429F.root"
-    ]
+    ],
+    "size": 660859941,
+    "nevents": 500000
 }

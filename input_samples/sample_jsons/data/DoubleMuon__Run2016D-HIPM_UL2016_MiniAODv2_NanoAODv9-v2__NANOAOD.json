@@ -22,5 +22,7 @@
         "/store/data/Run2016D/DoubleMuon/NANOAOD/HIPM_UL2016_MiniAODv2_NanoAODv9-v2/50000/E5F2CE3A-2EBA-1F4B-9E8C-922BD0A6D66D.root",
         "/store/data/Run2016D/DoubleMuon/NANOAOD/HIPM_UL2016_MiniAODv2_NanoAODv9-v2/50000/F6858F81-11EE-4647-B9C3-BEA6FC076DA1.root",
         "/store/data/Run2016D/DoubleMuon/NANOAOD/HIPM_UL2016_MiniAODv2_NanoAODv9-v2/50000/FBD43CEF-B7EA-3D47-8803-35E739C316D9.root"
-    ]
+    ],
+    "size": 29575478559,
+    "nevents": 33861745
 }

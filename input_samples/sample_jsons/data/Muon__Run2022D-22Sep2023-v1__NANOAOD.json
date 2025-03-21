@@ -82,5 +82,7 @@
         "/store/data/Run2022D/Muon/NANOAOD/22Sep2023-v1/2520000/fa88ef2d-d755-4de5-b90f-64c5dacbc5d2.root",
         "/store/data/Run2022D/Muon/NANOAOD/22Sep2023-v1/2520000/fe6cc579-3e6c-4981-835e-483e7df686c9.root",
         "/store/data/Run2022D/Muon/NANOAOD/22Sep2023-v1/2520000/fe7df7e9-614e-4c7e-9845-eb285df0498e.root"
-    ]
+    ],
+    "size": 61753191845,
+    "nevents": 75468381
 }

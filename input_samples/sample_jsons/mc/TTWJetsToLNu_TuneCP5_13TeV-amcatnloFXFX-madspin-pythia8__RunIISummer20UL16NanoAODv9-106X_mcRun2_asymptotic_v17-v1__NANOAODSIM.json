@@ -12,5 +12,7 @@
         "/store/mc/RunIISummer20UL16NanoAODv9/TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/70000/7E9F6CC0-91F2-704A-9341-25E17263CAA3.root",
         "/store/mc/RunIISummer20UL16NanoAODv9/TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/70000/9EFF6F24-8A89-A548-A157-43CD7453AC9D.root",
         "/store/mc/RunIISummer20UL16NanoAODv9/TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/70000/A6397DF8-5A7D-C44E-A374-8242AC1D9FF2.root"
-    ]
+    ],
+    "size": 8881058521,
+    "nevents": 3322643
 }
