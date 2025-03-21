@@ -1,3 +1,4 @@
+import os
 import json
 import subprocess
 
@@ -137,7 +138,7 @@ dataset_lst_mc = [
     "/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
     "/WW_TuneCP5_13TeV-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
 
-    # 2022 MC Samples    
+    # 2022 MC Samples
     "/WWZto4L2Nu_4F_TuneCP5_13p6TeV_amcatnlo-pythia8/Run3Summer22EENanoAODv12-130X_mcRun3_2022_realistic_postEE_v6-v2/NANOAODSIM",
     "/WWZto4L2Nu_4F_TuneCP5_13p6TeV_amcatnlo-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM",
     "/GluGluZH_ZtoAll_Hto2Wto2L2Nu_M-125_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/Run3Summer22EENanoAODv12-130X_mcRun3_2022_realistic_postEE_v6-v2/NANOAODSIM",
@@ -501,7 +502,7 @@ def get_file_names_from_das(dataset_name):
 
 
 # Dump a list of filenames into a json
-def dump_to_json(dataset_name,file_lst):
+def dump_to_json(dataset_name,file_lst,out_loc="."):
 
     # Name to call the output
     # Same as das datasete name except:
@@ -516,17 +517,30 @@ def dump_to_json(dataset_name,file_lst):
 
     # Dump to json
     out_dict = {"files" : file_lst}
-    with open(f"{out_name}.json", "w") as f:
+    with open(os.path.join(out_loc,f"{out_name}.json"), "w") as f:
         json.dump(out_dict, f, indent=4)
 
 
 def main():
 
-    dataset_name = "/WWZJetsTo4L2Nu_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM"
+    # Example for one dataset
+    #dataset_name = "/WWZJetsTo4L2Nu_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM"
+    #file_lst = get_file_names_from_das(dataset_name)
+    #dump_to_json(dataset_name,file_lst,"../../input_samples/sample_jsons/test_samples")
 
-    file_lst = get_file_names_from_das(dataset_name)
-    dump_to_json(dataset_name,file_lst)
+    # Loop over all data and make jsons
+    for name in dataset_lst_data:
+        print(f"Making json for: {name}..")
+        file_lst = get_file_names_from_das(name)
+        dump_to_json(name,file_lst,"../../input_samples/sample_jsons/data")
 
+    # Loop over all mc and make jsons
+    for name in dataset_lst_mc:
+        print(f"Making json for: {name}..")
+        file_lst = get_file_names_from_das(name)
+        dump_to_json(name,file_lst,"../../input_samples/sample_jsons/mc")
 
 
 main()
+
+
