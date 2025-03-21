@@ -57,7 +57,9 @@ if __name__ == '__main__':
     samples_dict = {}
     for json_name in json_lst:
         with open(json_name) as jf:
-            samples_dict[json_name] = json.load(jf)
+            jf_loaded = json.load(jf)
+            if jf_loaded["files"] == []: print(f"Empty file: {json_name}")
+            samples_dict[json_name] = jf_loaded
 
     # Print some summary info about the files to be processed
     print("\nInformation about samples to be processed:")
