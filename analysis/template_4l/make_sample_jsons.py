@@ -1,6 +1,7 @@
 import os
 import json
 import subprocess
+import ast
 
 dataset_lst_data = [
     # Data
@@ -482,7 +483,24 @@ dataset_lst_mc = [
 
 
 
+###### Tools ######
 
+
+# Get the size of the dataset on DAS
+def get_summary_from_das(dataset_name):
+
+    # Perform dasgoclient query to get size and nevents
+    command_str = [f'dasgoclient --query="summary dataset={dataset_name}"']
+    subprocess_out = subprocess.run(command_str,capture_output=True,text=True,shell=True).stdout
+    out = subprocess_out[1:-2] # Drop the leading and trailing square brackets
+    out = out.replace("null","None") # Cannot eval the text into a dict because python does not know "null"
+    out_dict = ast.literal_eval(out) # Convert the text into a python dict object
+
+    size = out_dict["file_size"]
+    nfiles = out_dict["nfiles"]
+    nevents = out_dict["nevents"]
+
+    return(size,nfiles,nevents)
 
 
 # Get a list of files for a dataset on DAS
@@ -501,8 +519,8 @@ def get_file_names_from_das(dataset_name):
     return file_lst
 
 
-# Dump a list of filenames into a json
-def dump_to_json(dataset_name,file_lst,out_loc="."):
+# Dump output dict into a json
+def dump_to_json(dataset_name,out_dict,out_loc="."):
 
     # Name to call the output
     # Same as das datasete name except:
@@ -516,29 +534,47 @@ def dump_to_json(dataset_name,file_lst,out_loc="."):
     out_name = out_name.replace("/","__")
 
     # Dump to json
-    out_dict = {"files" : file_lst}
     with open(os.path.join(out_loc,f"{out_name}.json"), "w") as f:
         json.dump(out_dict, f, indent=4)
 
+
+# Wrapper to get the dictionary that we want to dump to the json
+def get_dict_for_json(dataset_name):
+
+    # Get file list
+    file_lst = get_file_names_from_das(dataset_name)
+    file_lst.sort() # Make sure we get a predictable order (in case we need to remake it)
+
+    # Get summary info and do sanity check
+    size, nfiles, nevents = get_summary_from_das(dataset_name)
+    if nfiles != len(file_lst):
+        raise Exception(f"Something went wrong with getting the file list for {dataset_name}, length {len(file_lst)} does not match nfiles {nfiles}.")
+
+    return {"files": file_lst, "size": size, "nevents": nevents}
+
+
+
+###### Main ######
 
 def main():
 
     # Example for one dataset
     #dataset_name = "/WWZJetsTo4L2Nu_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM"
     #file_lst = get_file_names_from_das(dataset_name)
+    #size, nfiles, nevevents = get_summary_from_das(dataset_name)
     #dump_to_json(dataset_name,file_lst,"../../input_samples/sample_jsons/test_samples")
 
     # Loop over all data and make jsons
     for name in dataset_lst_data:
         print(f"Making json for: {name}..")
-        file_lst = get_file_names_from_das(name)
-        dump_to_json(name,file_lst,"../../input_samples/sample_jsons/data")
+        out_dict = get_dict_for_json(name)
+        dump_to_json(name,out_dict,"../../input_samples/sample_jsons/data")
 
     # Loop over all mc and make jsons
     for name in dataset_lst_mc:
         print(f"Making json for: {name}..")
-        file_lst = get_file_names_from_das(name)
-        dump_to_json(name,file_lst,"../../input_samples/sample_jsons/mc")
+        out_dict = get_dict_for_json(name)
+        dump_to_json(name,out_dict,"../../input_samples/sample_jsons/mc")
 
 
 main()
