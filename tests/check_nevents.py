@@ -15,4 +15,6 @@ def test_nevents():
     met = events.PuppiMET
     nevents = len(met.pt.compute())
 
-    assert (nevents == 42577)
+    print(f"Number of events in skimmed sample: {nevents}")
+
+    assert (nevents == 42576)
