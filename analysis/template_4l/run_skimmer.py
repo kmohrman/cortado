@@ -15,6 +15,8 @@ t_start = time.time()
 
 NanoAODSchema.warn_missing_crossrefs = False
 
+LST_OF_KNOWN_EXECUTORS = ["local","task_vine"]
+
 # Read and input file and return the lines
 def read_file(filename):
     with open(filename) as f:
@@ -35,23 +37,41 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("sample_cfg_name", help = "The name of the cfg file")
+    parser.add_argument('--executor','-x'  , default='local', help = 'Which executor to use', choices=LST_OF_KNOWN_EXECUTORS)
+    parser.add_argument('--outlocation','-o'   , default='skimtest/', help = 'Location for the outputs')
     args = parser.parse_args()
+
+    # Check that inputs are good
+    # Check that if on UF login node, we're using WQ
+    hostname = socket.gethostname()
+    if "login" in hostname:
+        # We are on a UF login node, better be using WQ
+        # Note if this ends up catching more than UF, can also check for "login"&"ufhpc" in name
+        if (executor == "local"):
+            raise Exception(f"\nError: We seem to be on a UF login node ({hostname}). If running from here, do not run locally.")
 
 
     ############ Get list of files from the input jsons ############
 
     # Get the prefix and json names from the cfg file
     # This is quite brittle
-    prefix = ""
-    json_lst = []
-    lines = read_file(args.sample_cfg_name)
-    for line in lines:
-        if line.startswith("#"): continue
-        if line == "": continue
-        elif line.startswith("prefix:"):
-            prefix = line.split()[1]
-        else:
-            json_lst.append(line)
+    if args.sample_cfg_name.endswith(".cfg"):
+        prefix = ""
+        json_lst = []
+        lines = read_file(args.sample_cfg_name)
+        for line in lines:
+            if line.startswith("#"): continue
+            if line == "": continue
+            elif line.startswith("prefix:"):
+                prefix = line.split()[1]
+            else:
+                json_lst.append(line)
+    elif args.sample_cfg_name.endswith(".json"):
+        # It seems we have been passed a single json instead of a config file with a list of jsons
+        prefix=""
+        json_lst = [args.sample_cfg_name]
+    else:
+        raise Exception("Unknown input type")
 
     # Build a sample dict with all info in the jsons
     samples_dict = {}
@@ -62,7 +82,7 @@ if __name__ == '__main__':
             samples_dict[json_name] = jf_loaded
 
     # Print some summary info about the files to be processed
-    print("\nInformation about samples to be processed:")
+    print(f"\nInformation about samples to be processed ({len(samples_dict)} total):")
     total_events = 0
     total_size = 0
     have_events_and_sizes = True
@@ -156,29 +176,34 @@ if __name__ == '__main__':
 
         # Reparititioning so that output has this many input partitions to on output
         print("\tRunning repartition")
-        skimmed = skimmed.repartition(n_to_one=1_000)
+        #skimmed = skimmed.repartition(n_to_one=1_000) # Comment for now, see https://github.com/dask-contrib/dask-awkward/issues/509
         t_dict["repartition"].append(time.time())
 
         # What does this do
         print("\tRunning dask_write")
         dask_write_out = uproot.dask_write(
             skimmed,
-            destination="skimtest/",
-            #destination="/blue/p.chang/k.mohrman/misc/skimout/",
+            destination=args.outlocation,
             prefix=f"{dataset}/skimmed",
             compute=False,
         )
         t_dict["dask_write"].append(time.time())
 
         # Call compute on the skimmed output
-        print("\tRunning dask.compute")
-        dask.compute(
-            dask_write_out,
-            scheduler=m.get,
-            lazy_transfers=True,
-            extra_files={proxy: "proxy.pem"},
-            env_vars={"X509_USER_PROXY": "proxy.pem"},
-        )
+        if args.executor == "local":
+            print("\tRunning dask.compute locally")
+            dask.compute(
+                dask_write_out,
+            )
+        if args.executor == "task_vine":
+            print("\tRunning dask.compute with task_vine")
+            dask.compute(
+                dask_write_out,
+                scheduler=m.get,
+                lazy_transfers=True,
+                extra_files={proxy: "proxy.pem"},
+                env_vars={"X509_USER_PROXY": "proxy.pem"},
+            )
         t_dict["dask.compute"].append(time.time())
 
     t_end = time.time()
