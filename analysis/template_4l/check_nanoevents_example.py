@@ -1,4 +1,3 @@
-import awkward as ak
 from coffea.nanoevents import NanoEventsFactory, NanoAODSchema
 
 fname = "skimtest/for_ci/skimmed-part0.root"
