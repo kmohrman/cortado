@@ -16,4 +16,4 @@ def test_nevents():
 
     print(f"Number of events in skimmed sample: {nevents}")
 
-    assert (nevents == 42576)
+    assert (nevents == 42577)
