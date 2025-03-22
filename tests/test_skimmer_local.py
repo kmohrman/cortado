@@ -9,6 +9,8 @@ def test_ewkcoffea():
         "input_samples/sample_jsons/test_samples/for_ci.json",
         "-x",
         "local",
+        "-o",
+        "analysis/template_4l/skimtest/",
     ]
 
     # Run ewkcoffea
