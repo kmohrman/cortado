@@ -14,4 +14,4 @@ def test_ewkcoffea():
     # Run ewkcoffea
     subprocess.run(args)
 
-    assert (exists('skimtest/for_ci/skimmed-part0.root'))
+    assert (exists('analysis/template_4l/skimtest/for_ci/skimmed-part0.root'))
