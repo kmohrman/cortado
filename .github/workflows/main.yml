@@ -67,4 +67,4 @@ jobs:
 
       - name: Run skimmer over test file
         run: |
-          conda run -n cortado_env pytest --cov=./ --cov-report=xml -rP --cov-append tests/test_skimmer_local.py
+          conda run -n cortado_env pytest tests/test_skimmer_local.py
