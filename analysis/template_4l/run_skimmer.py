@@ -1,6 +1,6 @@
 import argparse
 import time
-import yaml
+import socket
 import json
 import os
 import uproot
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     if "login" in hostname:
         # We are on a UF login node, better be using WQ
         # Note if this ends up catching more than UF, can also check for "login"&"ufhpc" in name
-        if (executor == "local"):
+        if (args.executor == "local"):
             raise Exception(f"\nError: We seem to be on a UF login node ({hostname}). If running from here, do not run locally.")
 
 

@@ -1,6 +1,5 @@
 import awkward as ak
-import dask_awkward as dak 
-import dask
+import dask_awkward as dak
 
 def is_rootcompat(a):
     """Is it a flat or 1-d jagged array?"""

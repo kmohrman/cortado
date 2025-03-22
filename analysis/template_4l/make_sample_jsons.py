@@ -500,7 +500,7 @@ def get_summary_from_das(dataset_name):
     nfiles = out_dict["nfiles"]
     nevents = out_dict["nevents"]
 
-    return(size,nfiles,nevents)
+    return (size,nfiles,nevents)
 
 
 # Get a list of files for a dataset on DAS

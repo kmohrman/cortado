@@ -1,8 +1,7 @@
 from coffea.nanoevents import NanoAODSchema
 from coffea.dataset_tools import preprocess, apply_to_fileset
 import awkward as ak
-import dask_awkward as dak 
-import dask
+import dask_awkward as dak
 import uproot
 
 def is_rootcompat(a):
@@ -41,7 +40,7 @@ dataset_runnable, _ = preprocess(
     {
         "dataset1": {
             "files": {
-                #f"10495AF7-2F9C-6440-BC72-4A29B6FEAEC7.root": "Events" for i in range(0, 100), # How ever many 
+                #f"10495AF7-2F9C-6440-BC72-4A29B6FEAEC7.root": "Events" for i in range(0, 100), # How ever many
                 "10495AF7-2F9C-6440-BC72-4A29B6FEAEC7.root": "Events",
                 "A6787F82-D6B8-424D-B35A-2A32FDB2837D.root": "Events",
             }
