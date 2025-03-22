@@ -118,18 +118,19 @@ if __name__ == '__main__':
 
     ############ Set up DaskVine stuff ############
 
-    m = DaskVine(
-        [9123,9128],
-        name=f"coffea-vine-{os.environ['USER']}",
-        run_info_path="/blue/p.chang/k.mohrman/vine-run-info",
-    )
-    proxy = m.declare_file(f"/tmp/x509up_u{os.getuid()}", cache=True)
-
-    t_after_setup = time.time()
+    if args.executor == "task_vine":
+        m = DaskVine(
+            [9123,9128],
+            name=f"coffea-vine-{os.environ['USER']}",
+            run_info_path="/blue/p.chang/k.mohrman/vine-run-info",
+        )
+        proxy = m.declare_file(f"/tmp/x509up_u{os.getuid()}", cache=True)
 
 
 
     ############ Run ############
+
+    t_after_setup = time.time()
 
     # This section is mainly copied from: https://github.com/scikit-hep/coffea/discussions/1100
 
