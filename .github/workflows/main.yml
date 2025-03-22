@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+  schedule:
+    - cron: '0 1 * * *' # Test every day at 1AM
+  
+jobs:
+
+  # Based on https://github.com/py-actions/flake8#quick-start
+  flake8-lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - name: Check out source repository
+        uses: actions/checkout@v3
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
+      - name: flake8 Lint
+        uses: py-actions/flake8@v2
+        with:
+          ignore: "E116,E201,E202,E203,E211,E221,E222,E226,E225,E227,E228,E231,E241,E251,E261,E262,E265,E266,E271,E272,E301,E302,E303,E305,E402,F403,F405,E501,W504,E701,E702,E711,E713,E714,E722,E731,E741,F841,W391,W605"
+
+  Full_Analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Add conda to system path
+        run: |
+          echo $CONDA/bin >> $GITHUB_PATH 
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
+
+      - name: Create conda env and install dependencies
+        run: |
+          conda config --set channel_priority strict
+          conda config --add channels conda-forge
+          conda env create -f environment.yml -n cortado_env
+          conda list -n cortado_env
+
+      - name: Install local pip packages
+        run: |
+          mkdir dir_for_topcoffea
+          cd dir_for_topcoffea
+          git clone https://github.com/TopEFT/topcoffea.git
+          cd topcoffea
+          conda run -n cortado_env pip install -e .
+          cd ../..
+          conda run -n cortado_env pip install -e .
+
+      - name: Conda list
+        run: |
+          conda list -n cortado_env
+
+      - name: Download root files
+        run: |
+          wget --no-verbose http://uaf-4.t2.ucsd.edu/~kmohrman/public_html_backup/for_ci/for_wwz/WWZJetsTo4L2Nu_4F_TuneCP5_13TeV-amcatnlo-pythia8__RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2__NANOAODSIM/DA1C387C-8EE5-0D48-9A16-79C0304EC3BC.root
+
+      - name: Pytest setup
+        run: |
+          conda install -y -n cortado_env -c conda-forge pytest
+
+      - name: Run skimmer over test file
+        run: |
+          conda run -n cortado_env pytest --cov=./ --cov-report=xml -rP --cov-append tests/test_skimmer_local.py
