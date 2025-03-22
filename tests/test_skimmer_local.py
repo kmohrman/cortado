@@ -1,7 +1,7 @@
 import subprocess
 from os.path import exists
 
-def test_ewkcoffea():
+def test_skimmer():
     args = [
         "time",
         "python",

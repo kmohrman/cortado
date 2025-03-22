@@ -68,3 +68,7 @@ jobs:
       - name: Run skimmer over test file
         run: |
           conda run -n cortado_env pytest tests/test_skimmer_local.py
+
+      - name: Check nevents in skimmed file
+        run: |
+          conda run -n cortado_env pytest tests/check_nevents.py
