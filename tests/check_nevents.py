@@ -1,4 +1,3 @@
-import awkward as ak
 from coffea.nanoevents import NanoEventsFactory, NanoAODSchema
 
 def test_nevents():
