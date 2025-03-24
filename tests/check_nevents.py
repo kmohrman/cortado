@@ -5,7 +5,7 @@ def test_nevents():
     fname = "analysis/template_4l/skimtest/for_ci/skimmed-part0.root"
 
     events = NanoEventsFactory.from_root(
-        {fname: "tree"},
+        {fname: "Events"},
         schemaclass=NanoAODSchema,
     ).events()
 

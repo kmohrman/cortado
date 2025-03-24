@@ -187,6 +187,7 @@ if __name__ == '__main__':
             destination=args.outlocation,
             prefix=f"{dataset}/skimmed",
             compute=False,
+            tree_name="Events",
         )
         t_dict["dask_write"].append(time.time())
 
