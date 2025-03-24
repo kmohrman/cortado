@@ -8,6 +8,7 @@ import dask
 from ndcctools.taskvine import DaskVine
 from coffea.nanoevents import NanoAODSchema
 from coffea.dataset_tools import preprocess, apply_to_fileset
+from functools import partial
 
 import cortado.modules.skim_tools as skim_tools
 
@@ -15,7 +16,7 @@ t_start = time.time()
 
 NanoAODSchema.warn_missing_crossrefs = False
 
-LST_OF_KNOWN_EXECUTORS = ["local","task_vine"]
+LST_OF_KNOWN_EXECUTORS = ["local", "taskvine"]
 
 # Read and input file and return the lines
 def read_file(filename):
@@ -118,13 +119,30 @@ if __name__ == '__main__':
 
     ############ Set up DaskVine stuff ############
 
-    if args.executor == "task_vine":
+    # Call compute on the skimmed output
+    if args.executor == "local":
+        print("\tRunning dask.compute locally")
+        executor = None
+    elif args.executor == "taskvine":
+        print("\tRunning dask.compute with taskvine")
+
         m = DaskVine(
-            [9123,9128],
+            [9123, 9128],
             name=f"coffea-vine-{os.environ['USER']}",
             run_info_path="/blue/p.chang/k.mohrman/vine-run-info",
         )
         proxy = m.declare_file(f"/tmp/x509up_u{os.getuid()}", cache=True)
+
+        executor = partial(
+            m.get,
+            lazy_transfers=True,
+            extra_files={proxy: "proxy.pem"},
+            env_vars={"X509_USER_PROXY": "proxy.pem"},
+            resources={"cores": 1},
+            resources_mode="max",
+        )
+
+    t_after_setup = time.time()
 
 
 
@@ -143,6 +161,7 @@ if __name__ == '__main__':
         files_per_batch=1,
         skip_bad_files=True,
         save_form=False,
+        scheduler=executor,
     )
     t_after_preprocess = time.time()
 
@@ -191,21 +210,11 @@ if __name__ == '__main__':
         )
         t_dict["dask_write"].append(time.time())
 
-        # Call compute on the skimmed output
-        if args.executor == "local":
-            print("\tRunning dask.compute locally")
-            dask.compute(
-                dask_write_out,
-            )
-        if args.executor == "task_vine":
-            print("\tRunning dask.compute with task_vine")
-            dask.compute(
-                dask_write_out,
-                scheduler=m.get,
-                lazy_transfers=True,
-                extra_files={proxy: "proxy.pem"},
-                env_vars={"X509_USER_PROXY": "proxy.pem"},
-            )
+        dask.compute(
+            dask_write_out,
+            scheduler=executor,
+        )
+
         t_dict["dask.compute"].append(time.time())
 
     t_end = time.time()
