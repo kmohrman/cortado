@@ -192,6 +192,7 @@ if __name__ == '__main__':
 
     # Loop over datasets and execute task graph and save
     print("Executing task graph and saving")
+    dask_write_out = {}
     dataset_counter = 0
     t_dict = {"loop_start":[], "uproot_writeable":[], "repartition":[], "dask_write":[], "dask.compute":[]}
     for dataset, skimmed in skimmed_dict.items():
@@ -213,7 +214,7 @@ if __name__ == '__main__':
 
         # What does this do
         print("\tRunning dask_write")
-        dask_write_out = uproot.dask_write(
+        dask_write_out[dataset] = uproot.dask_write(
             skimmed,
             destination=args.outlocation,
             prefix=f"{dataset}/skimmed",
@@ -222,15 +223,16 @@ if __name__ == '__main__':
         )
         t_dict["dask_write"].append(time.time())
 
-        dask.compute(
-            dask_write_out,
-            scheduler=executor,
-        )
+    t_after_dataset_loop = time.time()
 
-        t_dict["dask.compute"].append(time.time())
+    # Compute
+    dask.compute(
+        dask_write_out,
+        scheduler=executor,
+    )
+    t_after_compute = time.time()
 
     t_end = time.time()
-
 
 
     ############ Print timing info ############
@@ -239,12 +241,16 @@ if __name__ == '__main__':
     pretty_print_time(t_start,                t_after_setup,          "Time to setup")
     pretty_print_time(t_after_setup,          t_after_preprocess,     "Time for preprocess")
     pretty_print_time(t_after_preprocess,     t_after_applytofileset, "Time for apply_to_fileset")
+    print("Times for the loop over datasets:")
     for i in range(len(skimmed_dict)):
         pretty_print_time(t_dict["loop_start"][i],       t_dict["uproot_writeable"][i], f"Dataset {i}: time for uproot_writeable", "\t")
         pretty_print_time(t_dict["uproot_writeable"][i], t_dict["repartition"][i],      f"Dataset {i}: time for repartition", "\t")
         pretty_print_time(t_dict["repartition"][i],      t_dict["dask_write"][i],       f"Dataset {i}: time for dask_write", "\t")
-        pretty_print_time(t_dict["dask_write"][i],       t_dict["dask.compute"][i],     f"Dataset {i}: time for dask.compute", "\t")
-    pretty_print_time(t_after_applytofileset, t_end, "Time for the full run loop")
-    print("\nDone!\n")
+    pretty_print_time(t_after_applytofileset, t_after_dataset_loop, "Time for the full loop over datasets")
 
+
+
+    pretty_print_time(t_after_dataset_loop, t_after_compute, "Time for dask.compute")
+    pretty_print_time(t_start, t_end, "Time for total")
+    print("\nDone!\n")
 
