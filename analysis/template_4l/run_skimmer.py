@@ -66,7 +66,11 @@ if __name__ == '__main__':
             elif line.startswith("prefix:"):
                 prefix = line.split()[1]
             else:
-                json_lst.append(line)
+                if "#" in line:
+                    # Ignore trailing comments, this file parsing is so brittle :(
+                    json_lst.append(line.split("#")[0].strip())
+                else:
+                    json_lst.append(line)
     elif args.sample_cfg_name.endswith(".json"):
         # It seems we have been passed a single json instead of a config file with a list of jsons
         prefix=""
@@ -82,13 +86,19 @@ if __name__ == '__main__':
             if jf_loaded["files"] == []: print(f"Empty file: {json_name}")
             samples_dict[json_name] = jf_loaded
 
-    # Print some summary info about the files to be processed
+
+    # Get and print some summary info about the files to be processed
     print(f"\nInformation about samples to be processed ({len(samples_dict)} total):")
     total_events = 0
+    total_files = 0
     total_size = 0
     have_events_and_sizes = True
+    # Get the info across the samples_dict
     for ds_name in samples_dict:
+        nfiles = len(samples_dict[ds_name]["files"])
+        total_files  += nfiles
         if "nevents" in samples_dict[ds_name] and "size" in samples_dict[ds_name]:
+            # Only try to get this info if it's in the dict
             nevents = samples_dict[ds_name]["nevents"]
             size    = samples_dict[ds_name]["size"]
             total_events += nevents
@@ -97,9 +107,12 @@ if __name__ == '__main__':
         else:
             print(f"    Name: {ds_name}")
             have_events_and_sizes = False
+    # Print out totals
+    print(f"    Total files: {total_files}")
     if have_events_and_sizes:
         print(f"    Total events: {total_events}")
         print(f"    Total size: {total_size}\n")
+
 
     # Make the dataset object the processor wants
     dataset_dict = {}
@@ -121,10 +134,10 @@ if __name__ == '__main__':
 
     # Call compute on the skimmed output
     if args.executor == "local":
-        print("\tRunning dask.compute locally")
+        print("Will run dask.compute locally")
         executor = None
     elif args.executor == "taskvine":
-        print("\tRunning dask.compute with taskvine")
+        print("Will run dask.compute with taskvine")
 
         m = DaskVine(
             [9123, 9128],
@@ -142,8 +155,6 @@ if __name__ == '__main__':
             resources_mode="max",
         )
 
-    t_after_setup = time.time()
-
 
 
     ############ Run ############
@@ -158,12 +169,13 @@ if __name__ == '__main__':
         dataset_dict,
         align_clusters=False,
         step_size=100_000,  # You may want to set this to something slightly smaller to avoid loading too much in memory
-        files_per_batch=1,
-        skip_bad_files=True,
-        save_form=False,
+        files_per_batch=5,
+        skip_bad_files=False,
+        save_form=True,
         scheduler=executor,
     )
     t_after_preprocess = time.time()
+    pretty_print_time(t_after_setup,t_after_preprocess,"Preprocess time","")
 
 
     # Run apply_to_fileset
