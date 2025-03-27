@@ -226,7 +226,7 @@ if __name__ == '__main__':
     t_after_dataset_loop = time.time()
 
     # Compute
-    print("\Now running dask.compute..")
+    print("\nNow running dask.compute..")
     dask.compute(
         dask_write_out,
         scheduler=executor,
