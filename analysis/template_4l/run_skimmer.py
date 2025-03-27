@@ -179,7 +179,7 @@ if __name__ == '__main__':
 
 
     # Run apply_to_fileset
-    print("\nComputing dask task graph..")
+    print("\nRunning apply_to_fileset..")
     skimmed_dict = apply_to_fileset(
         skim_tools.make_skimmed_events,
         dataset_runnable,
@@ -208,7 +208,7 @@ if __name__ == '__main__':
         t_dict["uproot_writeable"].append(time.time())
 
         # Reparititioning so that output has this many input partitions to on output
-        print("\tRunning repartition")
+        #print("\tRunning repartition")
         #skimmed = skimmed.repartition(n_to_one=1_000) # Comment for now, see https://github.com/dask-contrib/dask-awkward/issues/509
         t_dict["repartition"].append(time.time())
 
@@ -226,6 +226,7 @@ if __name__ == '__main__':
     t_after_dataset_loop = time.time()
 
     # Compute
+    print("\Now running dask.compute..")
     dask.compute(
         dask_write_out,
         scheduler=executor,
