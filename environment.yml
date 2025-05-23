@@ -12,3 +12,4 @@ dependencies:
   - git
   - pyyaml
   - fsspec-xrootd
+  - conda-forge::dask-awkward=2025.5.0
