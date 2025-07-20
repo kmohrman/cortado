@@ -4,7 +4,7 @@ channels:
 dependencies:
   - conda-forge::python
   - numpy
-  - coffea=2025.5.1
+  - coffea=2025.3.0
   - ndcctools
   - conda-pack
   - dill
