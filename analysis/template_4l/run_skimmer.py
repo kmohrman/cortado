@@ -1,11 +1,15 @@
 import os
 import socket
+import argparse
+import json
 from coffea import processor
 from coffea.nanoevents import NanoAODSchema
 
 import skimmer_processor as analysis_processor
 
 NanoAODSchema.warn_missing_crossrefs = False
+
+LST_OF_KNOWN_EXECUTORS = ["iterative","futures","taskvine"]
 
 TASKVINE_ARGS = {
     "manager_name": f"coffea-vine-{os.environ['USER']}",
@@ -28,49 +32,118 @@ TASKVINE_ARGS = {
 
 if __name__ == '__main__':
 
-    fpath = "/home/k.mohrman/coffea_dir/ewkcoffea_skimming_branch/test_with_virt_arrs/cortado/analysis/template_4l/output_2.root"
+    ############ Parse input args ############
 
-    # Tmp hard code arguments
-    samplesdict = {'UL17_WWZJetsTo4L2Nu_forCI': {'xsec': 0.002067, 'year': '2017', 'treeName': 'Events', 'histAxisName': 'UL17_WWZJetsTo4L2Nu', 'options': '', 'WCnames': [], 'files': [fpath], 'nEvents': 112603, 'nGenEvents': 681198, 'nSumOfWeights': 1410.196684038, 'isData': False, 'path': '/home/users/mdittric/public_html/for_ci/for_wwz/WWZJetsTo4L2Nu_4F_TuneCP5_13TeV-amcatnlo-pythia8_RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2_NANOAODSIM_WWZ_MC_2024_0811/', 'nSumOfLheWeights': [1493.9196748783966, 1468.0248329944698, 1446.9199483633354, 1434.4723716873198, 1390.039697813769, 1385.2237857914258, 1362.2975223263684, 1342.9391390344656], 'redirector': ''}}
-    flist = {'UL17_WWZJetsTo4L2Nu_forCI': [fpath]}
+    parser = argparse.ArgumentParser()
+    parser.add_argument("sample_cfg_name", help = "The name of the cfg file")
+    parser.add_argument('--executor', '-x', default='iterative', help = 'Which executor to use', choices=LST_OF_KNOWN_EXECUTORS)
+    parser.add_argument('--outlocation', '-o', default='skimtest/', help = 'Location for the outputs')
+    args = parser.parse_args()
+
+    # Just hard coding these for now..
     treename = "Events"
     chunksize = 100000
     nchunks=None
     nworkers=8
 
-
+    # Check that inputs are good
     # Check that if on UF login node, we're using TaskVine
     hostname = socket.gethostname()
     if "login" in hostname:
         # We are on a UF login node, better be using TaskVine
         # Note if this ends up catching more than UF, can also check for "login"&"ufhpc" in name
-        if (executor != "taskvine"):
+        if (args.executor != "taskvine"):
             raise Exception(f"\nError: We seem to be on a UF login node ({hostname}). If running from here, need to run with TaskVine.")
 
 
-    #executor = "iterative"
-    executor = "futures"
-    #executor = "taskvine"
+    ############ Get list of files from the input jsons ############
+
+    # Get the prefix and json names from the cfg file
+    # This is quite brittle
+    if args.sample_cfg_name.endswith(".cfg"):
+        prefix = ""
+        json_lst = []
+        lines = read_file(args.sample_cfg_name)
+        for line in lines:
+            if line.startswith("#"): continue
+            if line == "": continue
+            elif line.startswith("prefix:"):
+                prefix = line.split()[1]
+            else:
+                if "#" in line:
+                    # Ignore trailing comments, this file parsing is so brittle :(
+                    json_lst.append(line.split("#")[0].strip())
+                else:
+                    json_lst.append(line)
+    elif args.sample_cfg_name.endswith(".json"):
+        # It seems we have been passed a single json instead of a config file with a list of jsons
+        prefix=""
+        json_lst = [args.sample_cfg_name]
+    else:
+        raise Exception("Unknown input type")
+
+    # Build a sample dict with all info in the jsons
+    samples_dict = {} # All of the info that we pass to the processor
+    fileset_dict = {} # Just {dataset: [file, file], ...}
+    for json_name in json_lst:
+        with open(json_name) as jf:
+            jf_loaded = json.load(jf)
+            if jf_loaded["files"] == []: print(f"Empty file: {json_name}")
+            samples_dict[json_name] = jf_loaded
+            fileset_dict[json_name] = jf_loaded["files"]
+
+
+    # Get and print some summary info about the files to be processed
+    print(f"\nInformation about samples to be processed ({len(samples_dict)} total):")
+    total_events = 0
+    total_files = 0
+    total_size = 0
+    have_events_and_sizes = True
+    # Get the info across the samples_dict
+    for ds_name in samples_dict:
+        nfiles = len(samples_dict[ds_name]["files"])
+        total_files  += nfiles
+        if "nevents" in samples_dict[ds_name] and "size" in samples_dict[ds_name]:
+            # Only try to get this info if it's in the dict
+            nevents = samples_dict[ds_name]["nevents"]
+            size    = samples_dict[ds_name]["size"]
+            total_events += nevents
+            total_size   += size
+            print(f"    Name: {ds_name} ({nevents} events)")
+        else:
+            print(f"    Name: {ds_name}")
+            have_events_and_sizes = False
+    # Print out totals
+    print(f"    Total files: {total_files}")
+    if have_events_and_sizes:
+        print(f"    Total events: {total_events}")
+        print(f"    Total size: {total_size}\n")
+
+
+
+    ############ Running ############
+
+    print(samples_dict)
 
     #events = NanoEventsFactory.from_root({filename: "Events"}, mode="eager").events()
     #events = NanoEventsFactory.from_root({filename: "Events"}, mode="virtual").events()
 
-    processor_instance = analysis_processor.AnalysisProcessor(samplesdict)
+    processor_instance = analysis_processor.AnalysisProcessor(samples_dict)
 
-    if executor == "iterative":
+    # Set up the runner
+    if args.executor == "iterative":
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
-    elif executor == "futures":
+    elif args.executor == "futures":
         exec_instance = processor.FuturesExecutor(workers=nworkers)
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
-    elif executor == "taskvine":
+    elif args.executor == "taskvine":
         try:
-            #executor = processor.TaskVineExecutor(**executor_args)
-            executor = processor.TaskVineExecutor(**TASKVINE_ARGS)
+            args.executor = processor.TaskVineExecutor(**TASKVINE_ARGS)
         except AttributeError:
             raise RuntimeError("TaskVineExecutor not available.")
         runner = processor.Runner(
-            executor,
+            args.executor,
             schema=NanoAODSchema,
             chunksize=chunksize,
             maxchunks=nchunks,
@@ -79,6 +152,7 @@ if __name__ == '__main__':
         )
 
 
-    output = runner(flist, processor_instance, treename)
-
+    # Run the processor
+    output = runner(fileset_dict, processor_instance, treename)
     print("\nDone!")
+
