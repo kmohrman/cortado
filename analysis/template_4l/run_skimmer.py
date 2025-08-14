@@ -29,6 +29,19 @@ TASKVINE_ARGS = {
     "print_stdout": False,
 }
 
+# Read and input file and return the lines
+def read_file(filename):
+    with open(filename) as f:
+        content = f.readlines()
+    content = [x.strip() for x in content]
+    return content
+
+# Print timing info in s and m
+def pretty_print_time(t0,t1,tag,indent=" "*4):
+    dt = t1-t0
+    print(f"{indent}{tag}: {round(dt,3)}s  ({round(dt/60,3)}m)")
+
+
 
 if __name__ == '__main__':
 
@@ -44,7 +57,8 @@ if __name__ == '__main__':
     treename = "Events"
     chunksize = 100000
     nchunks=None
-    nworkers=8
+    #nworkers=8
+    nworkers=32
 
     # Check that inputs are good
     # Check that if on UF login node, we're using TaskVine
@@ -85,12 +99,34 @@ if __name__ == '__main__':
     # Build a sample dict with all info in the jsons
     samples_dict = {} # All of the info that we pass to the processor
     fileset_dict = {} # Just {dataset: [file, file], ...}
-    for json_name in json_lst:
-        with open(json_name) as jf:
+    for json_path in json_lst:
+        tag = json_path.split("/")[-1][:-5]
+        flst_with_prefix = [] # List of files with prefix appended
+
+        # Load the json
+        with open(json_path) as jf:
             jf_loaded = json.load(jf)
-            if jf_loaded["files"] == []: print(f"Empty file: {json_name}")
-            samples_dict[json_name] = jf_loaded
-            fileset_dict[json_name] = jf_loaded["files"]
+            if jf_loaded["files"] == []:
+                print(f"Empty file list in this json: {json_path}")
+                raise Exception("No files here, is this expected?")
+
+            # Get the list of files with the prefix appended
+            for filename in jf_loaded["files"]:
+                flst_with_prefix.append(prefix+filename) # Brittle :(
+
+            # Fill the fileset_dict
+            fileset_dict[tag] = flst_with_prefix
+
+            # Fill the samples_dict
+            samples_dict[tag] = {}
+            for key_name in jf_loaded:
+                if key_name == "files":
+                    samples_dict[tag][key_name] = flst_with_prefix
+                else:
+                    samples_dict[tag][key_name] = jf_loaded[key_name]
+
+    #print(f"\nsamples dict:\n{samples_dict}\n")
+    #print(f"\nfileset dict:\n{fileset_dict}\n")
 
 
     # Get and print some summary info about the files to be processed
@@ -122,8 +158,6 @@ if __name__ == '__main__':
 
 
     ############ Running ############
-
-    print(samples_dict)
 
     #events = NanoEventsFactory.from_root({filename: "Events"}, mode="eager").events()
     #events = NanoEventsFactory.from_root({filename: "Events"}, mode="virtual").events()
