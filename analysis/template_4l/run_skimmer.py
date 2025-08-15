@@ -17,10 +17,11 @@ TASKVINE_ARGS = {
     #"environment_file": remote_environment.get_environment(
     #    extra_pip_local={"topeft": ["topeft", "setup.py"]},
     #),
-    "extra_input_files": ["analysis_processor.py"],
+    "extra_input_files": ["skimmer_processor.py"],
     "retries": 15,
     "compression": 0,
     "filepath": f'/tmp/{os.environ["USER"]}',
+    "run_info_path": "/blue/p.chang/k.mohrman/vine-run-info/cortado",
     "resource_monitor": "measure",
     "resources_mode": "auto",
     "treereduction": 10,
@@ -51,16 +52,16 @@ if __name__ == '__main__':
     parser.add_argument("sample_cfg_name", help = "The name of the cfg file")
     parser.add_argument('--executor', '-x', default='iterative', help = 'Which executor to use', choices=LST_OF_KNOWN_EXECUTORS)
     parser.add_argument('--outlocation', '-o', default='skimtest/', help = 'Location for the outputs')
+    parser.add_argument('--nworkers', '-n', default=8  , help = 'Number of cores for futures executor')
     args = parser.parse_args()
 
     # Just hard coding these for now..
     treename = "Events"
-    chunksize = 100000
+    chunksize = 500000
     nchunks=None
-    #nworkers=8
-    nworkers=32
 
-    # Check that inputs are good
+    # Check things about inputs
+
     # Check that if on UF login node, we're using TaskVine
     hostname = socket.gethostname()
     if "login" in hostname:
@@ -68,6 +69,10 @@ if __name__ == '__main__':
         # Note if this ends up catching more than UF, can also check for "login"&"ufhpc" in name
         if (args.executor != "taskvine"):
             raise Exception(f"\nError: We seem to be on a UF login node ({hostname}). If running from here, need to run with TaskVine.")
+
+    # Check if outdir exists, make it if not
+    if not os.path.exists(args.outlocation):
+        os.makedirs(args.outlocation)
 
 
     ############ Get list of files from the input jsons ############
@@ -162,14 +167,14 @@ if __name__ == '__main__':
     #events = NanoEventsFactory.from_root({filename: "Events"}, mode="eager").events()
     #events = NanoEventsFactory.from_root({filename: "Events"}, mode="virtual").events()
 
-    processor_instance = analysis_processor.AnalysisProcessor(samples_dict)
+    processor_instance = analysis_processor.AnalysisProcessor(samples_dict,args.outlocation)
 
     # Set up the runner
     if args.executor == "iterative":
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
     elif args.executor == "futures":
-        exec_instance = processor.FuturesExecutor(workers=nworkers)
+        exec_instance = processor.FuturesExecutor(workers=int(args.nworkers))
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
     elif args.executor == "taskvine":
         try:
