@@ -1,22 +1,34 @@
-import argparse
-import time
-import socket
-import json
 import os
-import uproot
-import dask
-from ndcctools.taskvine import DaskVine
+import socket
+import argparse
+import json
+from coffea import processor
 from coffea.nanoevents import NanoAODSchema
-from coffea.dataset_tools import preprocess, apply_to_fileset
-from functools import partial
 
-import cortado.modules.skim_tools as skim_tools
-
-t_start = time.time()
+import skimmer_processor as analysis_processor
 
 NanoAODSchema.warn_missing_crossrefs = False
 
-LST_OF_KNOWN_EXECUTORS = ["local", "taskvine"]
+LST_OF_KNOWN_EXECUTORS = ["iterative","futures","taskvine"]
+
+TASKVINE_ARGS = {
+    "manager_name": f"coffea-vine-{os.environ['USER']}",
+    "port": 9123-9130,
+    #"environment_file": remote_environment.get_environment(
+    #    extra_pip_local={"topeft": ["topeft", "setup.py"]},
+    #),
+    "extra_input_files": ["skimmer_processor.py"],
+    "retries": 15,
+    "compression": 0,
+    "filepath": f'/tmp/{os.environ["USER"]}',
+    "run_info_path": "/blue/p.chang/k.mohrman/vine-run-info/cortado",
+    "resource_monitor": "measure",
+    "resources_mode": "auto",
+    "treereduction": 10,
+    "fast_terminate_workers": 0,
+    "verbose": True,
+    "print_stdout": False,
+}
 
 # Read and input file and return the lines
 def read_file(filename):
@@ -31,25 +43,36 @@ def pretty_print_time(t0,t1,tag,indent=" "*4):
     print(f"{indent}{tag}: {round(dt,3)}s  ({round(dt/60,3)}m)")
 
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
 
     ############ Parse input args ############
 
     parser = argparse.ArgumentParser()
     parser.add_argument("sample_cfg_name", help = "The name of the cfg file")
-    parser.add_argument('--executor','-x'  , default='local', help = 'Which executor to use', choices=LST_OF_KNOWN_EXECUTORS)
-    parser.add_argument('--outlocation','-o'   , default='skimtest/', help = 'Location for the outputs')
+    parser.add_argument('--executor', '-x', default='iterative', help = 'Which executor to use', choices=LST_OF_KNOWN_EXECUTORS)
+    parser.add_argument('--outlocation', '-o', default='skimtest/', help = 'Location for the outputs')
+    parser.add_argument('--nworkers', '-n', default=8  , help = 'Number of cores for futures executor')
     args = parser.parse_args()
 
-    # Check that inputs are good
-    # Check that if on UF login node, we're using WQ
+    # Just hard coding these for now..
+    treename = "Events"
+    chunksize = 500000
+    nchunks=None
+
+    # Check things about inputs
+
+    # Check that if on UF login node, we're using TaskVine
     hostname = socket.gethostname()
     if "login" in hostname:
-        # We are on a UF login node, better be using WQ
+        # We are on a UF login node, better be using TaskVine
         # Note if this ends up catching more than UF, can also check for "login"&"ufhpc" in name
-        if (args.executor == "local"):
-            raise Exception(f"\nError: We seem to be on a UF login node ({hostname}). If running from here, do not run locally.")
+        if (args.executor != "taskvine"):
+            raise Exception(f"\nError: We seem to be on a UF login node ({hostname}). If running from here, need to run with TaskVine.")
+
+    # Check if outdir exists, make it if not
+    if not os.path.exists(args.outlocation):
+        os.makedirs(args.outlocation)
 
 
     ############ Get list of files from the input jsons ############
@@ -79,12 +102,36 @@ if __name__ == '__main__':
         raise Exception("Unknown input type")
 
     # Build a sample dict with all info in the jsons
-    samples_dict = {}
-    for json_name in json_lst:
-        with open(json_name) as jf:
+    samples_dict = {} # All of the info that we pass to the processor
+    fileset_dict = {} # Just {dataset: [file, file], ...}
+    for json_path in json_lst:
+        tag = json_path.split("/")[-1][:-5]
+        flst_with_prefix = [] # List of files with prefix appended
+
+        # Load the json
+        with open(json_path) as jf:
             jf_loaded = json.load(jf)
-            if jf_loaded["files"] == []: print(f"Empty file: {json_name}")
-            samples_dict[json_name] = jf_loaded
+            if jf_loaded["files"] == []:
+                print(f"Empty file list in this json: {json_path}")
+                raise Exception("No files here, is this expected?")
+
+            # Get the list of files with the prefix appended
+            for filename in jf_loaded["files"]:
+                flst_with_prefix.append(prefix+filename) # Brittle :(
+
+            # Fill the fileset_dict
+            fileset_dict[tag] = flst_with_prefix
+
+            # Fill the samples_dict
+            samples_dict[tag] = {}
+            for key_name in jf_loaded:
+                if key_name == "files":
+                    samples_dict[tag][key_name] = flst_with_prefix
+                else:
+                    samples_dict[tag][key_name] = jf_loaded[key_name]
+
+    #print(f"\nsamples dict:\n{samples_dict}\n")
+    #print(f"\nfileset dict:\n{fileset_dict}\n")
 
 
     # Get and print some summary info about the files to be processed
@@ -114,144 +161,37 @@ if __name__ == '__main__':
         print(f"    Total size: {total_size}\n")
 
 
-    # Make the dataset object the processor wants
-    dataset_dict = {}
-    for json_path in samples_dict.keys():
-        # Drop the .json from the end to get a name
-        tag = json_path.split("/")[-1][:-5]
-        # Prepend the prefix to the filenames and fill into the dataset dict
-        dataset_dict[tag] = {}
-        dataset_dict[tag]["files"] = {}
-        for filename in samples_dict[json_path]["files"]:
-            fullpath = prefix+filename
-            dataset_dict[tag]["files"][fullpath] = "Events"
 
-    #print(f"\nDataset dict:\n{dataset_dict}\n")
+    ############ Running ############
 
+    #events = NanoEventsFactory.from_root({filename: "Events"}, mode="eager").events()
+    #events = NanoEventsFactory.from_root({filename: "Events"}, mode="virtual").events()
 
+    processor_instance = analysis_processor.AnalysisProcessor(samples_dict,args.outlocation)
 
-    ############ Set up DaskVine stuff ############
-
-    # Call compute on the skimmed output
-    if args.executor == "local":
-        print("Will run dask.compute locally")
-        executor = None
+    # Set up the runner
+    if args.executor == "iterative":
+        exec_instance = processor.IterativeExecutor()
+        runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
+    elif args.executor == "futures":
+        exec_instance = processor.FuturesExecutor(workers=int(args.nworkers))
+        runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
     elif args.executor == "taskvine":
-        print("Will run dask.compute with taskvine")
-
-        m = DaskVine(
-            [9123, 9128],
-            name=f"coffea-vine-{os.environ['USER']}",
-            run_info_path="/blue/p.chang/k.mohrman/vine-run-info",
-        )
-        proxy = m.declare_file(f"/tmp/x509up_u{os.getuid()}", cache=True)
-
-        executor = partial(
-            m.get,
-            lazy_transfers=True,
-            extra_files={proxy: "proxy.pem"},
-            env_vars={"X509_USER_PROXY": "proxy.pem"},
-            resources={"cores": 1},
-            resources_mode="max",
+        try:
+            args.executor = processor.TaskVineExecutor(**TASKVINE_ARGS)
+        except AttributeError:
+            raise RuntimeError("TaskVineExecutor not available.")
+        runner = processor.Runner(
+            args.executor,
+            schema=NanoAODSchema,
+            chunksize=chunksize,
+            maxchunks=nchunks,
+            skipbadfiles=True,
+            xrootdtimeout=300,
         )
 
 
-
-    ############ Run ############
-
-    t_after_setup = time.time()
-
-    # This section is mainly copied from: https://github.com/scikit-hep/coffea/discussions/1100
-
-    # Run preprocess
-    print("\nRunning preprocessing..")  # To obtain file splitting
-    dataset_runnable, _ = preprocess(
-        dataset_dict,
-        align_clusters=False,
-        step_size=100_000,  # You may want to set this to something slightly smaller to avoid loading too much in memory
-        files_per_batch=5,
-        skip_bad_files=False,
-        save_form=True,
-        scheduler=executor,
-    )
-    t_after_preprocess = time.time()
-    pretty_print_time(t_after_setup,t_after_preprocess,"Preprocess time","")
-
-
-    # Run apply_to_fileset
-    print("\nRunning apply_to_fileset..")
-    skimmed_dict = apply_to_fileset(
-        skim_tools.make_skimmed_events,
-        dataset_runnable,
-        schemaclass=NanoAODSchema,
-        uproot_options={"timeout": 180},
-    )
-    t_after_applytofileset = time.time()
-    print(f"\nSkimmed dict:\n{skimmed_dict}\n")
-
-
-    # Loop over datasets and execute task graph and save
-    print("Executing task graph and saving")
-    dask_write_out = {}
-    dataset_counter = 0
-    t_dict = {"loop_start":[], "uproot_writeable":[], "repartition":[], "dask_write":[], "dask.compute":[]}
-    for dataset, skimmed in skimmed_dict.items():
-        t_dict["loop_start"].append(time.time())
-        dataset_counter = dataset_counter + 1
-        print(f"Name of dataset {dataset_counter}: {dataset}")
-
-        # What does this do
-        print("\tRunning uproot_writeable")
-        skimmed = skim_tools.uproot_writeable(
-            skimmed,
-        )
-        t_dict["uproot_writeable"].append(time.time())
-
-        # Reparititioning so that output has this many input partitions to on output
-        #print("\tRunning repartition")
-        #skimmed = skimmed.repartition(n_to_one=1_000) # Comment for now, see https://github.com/dask-contrib/dask-awkward/issues/509
-        t_dict["repartition"].append(time.time())
-
-        # What does this do
-        print("\tRunning dask_write")
-        dask_write_out[dataset] = uproot.dask_write(
-            skimmed,
-            destination=args.outlocation,
-            prefix=f"{dataset}/skimmed",
-            compute=False,
-            tree_name="Events",
-        )
-        t_dict["dask_write"].append(time.time())
-
-    t_after_dataset_loop = time.time()
-
-    # Compute
-    print("\nNow running dask.compute..")
-    dask.compute(
-        dask_write_out,
-        scheduler=executor,
-    )
-    t_after_compute = time.time()
-
-    t_end = time.time()
-
-
-    ############ Print timing info ############
-
-    print("\nTiming info:")
-    pretty_print_time(t_start,                t_after_setup,          "Time to setup")
-    pretty_print_time(t_after_setup,          t_after_preprocess,     "Time for preprocess")
-    pretty_print_time(t_after_preprocess,     t_after_applytofileset, "Time for apply_to_fileset")
-    print("Times for the loop over datasets:")
-    for i in range(len(skimmed_dict)):
-        pretty_print_time(t_dict["loop_start"][i],       t_dict["uproot_writeable"][i], f"Dataset {i}: time for uproot_writeable", "\t")
-        pretty_print_time(t_dict["uproot_writeable"][i], t_dict["repartition"][i],      f"Dataset {i}: time for repartition", "\t")
-        pretty_print_time(t_dict["repartition"][i],      t_dict["dask_write"][i],       f"Dataset {i}: time for dask_write", "\t")
-    pretty_print_time(t_after_applytofileset, t_after_dataset_loop, "Time for the full loop over datasets")
-
-
-
-    pretty_print_time(t_after_dataset_loop, t_after_compute, "Time for dask.compute")
-    pretty_print_time(t_start, t_end, "Time for total")
-    print("\nDone!\n")
+    # Run the processor
+    output = runner(fileset_dict, processor_instance, treename)
+    print("\nDone!")
 

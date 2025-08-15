@@ -4,7 +4,7 @@ channels:
 dependencies:
   - conda-forge::python
   - numpy
-  - coffea=2025.3.0
+  - coffea
   - ndcctools
   - conda-pack
   - dill
@@ -12,4 +12,4 @@ dependencies:
   - git
   - pyyaml
   - fsspec-xrootd
-  - conda-forge::dask-awkward=2025.5.0
+  - conda-forge::dask-awkward
