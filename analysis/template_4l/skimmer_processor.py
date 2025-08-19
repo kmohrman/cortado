@@ -25,8 +25,9 @@ class AnalysisProcessor(processor.ProcessorABC):
         out_events = skim_tools.make_skimmed_events(events)
 
         # Write out the events
-        with uproot.recreate(fpath_out) as fout:
-            fout["Events"] = skim_tools.uproot_writeable(out_events)
+        if len(out_events) > 0:
+            with uproot.recreate(fpath_out) as fout:
+                fout["Events"] = skim_tools.uproot_writeable(out_events)
 
         return {}
 

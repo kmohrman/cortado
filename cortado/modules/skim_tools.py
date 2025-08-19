@@ -30,8 +30,7 @@ def make_skimmed_events(events):
 
     ele = events.Electron
     muo = events.Muon
-    #nlep = ak.num(ele) + ak.num(muo)
-    nlep = ak.num(ele)
+    nlep = ak.num(ele) + ak.num(muo)
     mask = nlep >= 4
     #print("e+m",nlep.compute())
 

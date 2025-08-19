@@ -20,13 +20,15 @@ TASKVINE_ARGS = {
     "extra_input_files": ["skimmer_processor.py"],
     "retries": 15,
     "compression": 0,
-    "filepath": f'/tmp/{os.environ["USER"]}',
-    "run_info_path": "/blue/p.chang/k.mohrman/vine-run-info/cortado",
+    #"filepath": f'/tmp/{os.environ["USER"]}',
+    #"run_info_path": "/blue/p.chang/k.mohrman/vine-run-info/cortado",
+    "filepath": "/blue/p.chang/k.mohrman/vine-run-info/cortado",
     "resource_monitor": "measure",
     "resources_mode": "auto",
     "treereduction": 10,
     "fast_terminate_workers": 0,
-    "verbose": True,
+    #"verbose": True,
+    "verbose": False,
     "print_stdout": False,
 }
 
@@ -57,7 +59,7 @@ if __name__ == '__main__':
 
     # Just hard coding these for now..
     treename = "Events"
-    chunksize = 500000
+    chunksize = 100000
     nchunks=None
 
     # Check things about inputs
