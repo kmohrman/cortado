@@ -12,7 +12,7 @@ def test_nevents():
     # Surely there's a better way to get nevents
     # But let's just check len of met
     met = events.PuppiMET
-    nevents = len(met.pt.compute())
+    nevents = len(met.pt)
 
     print(f"Number of events in skimmed sample: {nevents}")
 
