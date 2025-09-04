@@ -9,5 +9,8 @@ events = NanoEventsFactory.from_root(
 
 # For example, looking at MET
 met = events.PuppiMET
+
+# Print some info
+print("")
 print("n events 2:",len(met.pt))
 
