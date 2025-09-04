@@ -8,7 +8,7 @@ def test_skimmer():
         "analysis/template_4l/run_skimmer.py",
         "input_samples/sample_jsons/test_samples/for_ci.json",
         "-x",
-        "local",
+        "futures",
         "-o",
         "analysis/template_4l/skimtest/",
     ]
@@ -16,4 +16,4 @@ def test_skimmer():
     # Run ewkcoffea
     subprocess.run(args)
 
-    assert (exists('analysis/template_4l/skimtest/for_ci/skimmed-part0.root'))
+    assert (exists('analysis/template_4l/skimtest/for_ci_0.root'))

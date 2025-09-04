@@ -23,10 +23,10 @@ Now all of the dependencies have been installed and the `cortado` repository is 
 To run an example skimming workflow, navigate to the `template_4l` and run the run script, e.g.:
 ```
 cd analysis/template_4l
-python run_skimmer.py exampl_samples.cfg -x local -o skimtest
+python run_skimmer.py exampl_samples.cfg -x iterative -o skimtest
 ```
-Remember to acitivate the `voms-proxy` if using `xrd` to access the files. If running with the `DaskVine` scheduler, an example command to submit a worker is below (example is relevant to running on `hipergator` at UF). It can be run in a separate terminal (but if running in a different terminal, remember to activate the conda environment there as well).
+Remember to acitivate the `voms-proxy` if using `xrd` to access the files. If scaling out with `TaskVine`, an example command to submit a worker is below (example is relevant to running on `hipergator` at UF). It can be run in a separate terminal (but if running in a different terminal, remember to activate the conda environment there as well).
 ```
-vine_submit_workers -T slurm --cores 2 --memory 4000 -M coffea-vine-${USER} -p  "--account avery --qos avery --time 0:30:00" 1
+vine_submit_workers -T slurm --cores 4 --memory 16000 -M coffea-vine-${USER} -p "--account avery --qos avery --time 1:30:00" -t 5400 5
 ```
 The status of the projects can be viewed with the `vine_status` command, or by checking the [TaskVine monitoring page](https://ccl.cse.nd.edu/software/taskvine/status/). 
