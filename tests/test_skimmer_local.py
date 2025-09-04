@@ -8,7 +8,7 @@ def test_skimmer():
         "analysis/template_4l/run_skimmer.py",
         "input_samples/sample_jsons/test_samples/for_ci.json",
         "-x",
-        "local",
+        "futures",
         "-o",
         "analysis/template_4l/skimtest/",
     ]
