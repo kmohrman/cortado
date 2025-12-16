@@ -12,7 +12,7 @@ NanoAODSchema.warn_missing_crossrefs = False
 LST_OF_KNOWN_EXECUTORS = ["iterative","futures","taskvine"]
 
 TASKVINE_ARGS = {
-    "manager_name": f"coffea-vine-{os.environ['USER']}",
+    #"manager_name": f"coffea-vine-{os.environ['USER']}",
     "port": 9123-9130,
     #"environment_file": remote_environment.get_environment(
     #    extra_pip_local={"topeft": ["topeft", "setup.py"]},
@@ -55,6 +55,7 @@ if __name__ == '__main__':
     parser.add_argument('--executor', '-x', default='iterative', help = 'Which executor to use', choices=LST_OF_KNOWN_EXECUTORS)
     parser.add_argument('--outlocation', '-o', default='skimtest/', help = 'Location for the outputs')
     parser.add_argument('--nworkers', '-n', default=8  , help = 'Number of cores for futures executor')
+    parser.add_argument('--tag', '-t', default='' , help = 'A unique identifier for manager name')
     args = parser.parse_args()
 
     # Just hard coding these for now..
@@ -168,6 +169,9 @@ if __name__ == '__main__':
 
     #events = NanoEventsFactory.from_root({filename: "Events"}, mode="eager").events()
     #events = NanoEventsFactory.from_root({filename: "Events"}, mode="virtual").events()
+
+    taskvine_args = TASKVINE_ARGS
+    taskvine_args["manager_name"] = f"coffea-vine-{os.environ['USER']}{args.tag}"
 
     processor_instance = analysis_processor.AnalysisProcessor(samples_dict,args.outlocation)
 

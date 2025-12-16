@@ -17,8 +17,9 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         # Create the output name
         json_name = events.metadata["dataset"]
+        fileuuid = events.metadata["fileuuid"]
         entrystart = events.metadata["entrystart"]
-        fname_out = f"{json_name}_{entrystart}.root"
+        fname_out = f"{json_name}_{fileuuid}_{entrystart}.root"
         fpath_out = os.path.join(self._outdir,fname_out)
 
         # Perform the skim
@@ -28,6 +29,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         if len(out_events) > 0:
             with uproot.recreate(fpath_out) as fout:
                 fout["Events"] = skim_tools.uproot_writeable(out_events)
+                #fout["Events"] = out_events
 
         return {}
 
